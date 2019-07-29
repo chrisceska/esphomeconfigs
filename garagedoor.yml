@@ -1,0 +1,60 @@
+esphome:
+  name: garagedoor
+  platform: ESP8266
+  board: nodemcu
+
+wifi:
+  ssid: "wifi"
+  password: "password"
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "apipassword"
+
+ota:
+  password: "otapassword"
+
+switch:
+  - platform: gpio
+    pin: D1
+    id: relay
+  - platform: template
+    name: "Gate Remote"
+    icon: "mdi:gate"
+    turn_on_action:
+    - switch.turn_on: relay
+    - delay: 500ms
+    - switch.turn_off: relay
+  - platform: restart
+    name: 'Garage Door REBOOT'
+binary_sensor:
+- platform: gpio
+  pin:
+    number: D2
+    mode: INPUT_PULLUP
+    inverted: False
+  name: "Garage Door Sensor"
+  device_class: garage_door
+  filters:
+    - delayed_on: 20ms
+sensor:
+- platform: dht
+  pin: D0
+  temperature:
+    name: "Garage Temperature"
+    filters:
+    - lambda: return x * (9.0/5.0) + 32.0;
+    unit_of_measurement: "°F"
+  humidity:
+    name: "Garage Humidity"
+  update_interval: 60s
+  model: DHT11
+- platform: wifi_signal
+  name: "Frontgate WiFi Signal"
+  update_interval: 60s
+- platform: uptime
+  name: Frontgate uptime Sensor
+
